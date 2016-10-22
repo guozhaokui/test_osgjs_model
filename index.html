@@ -1,130 +1,20 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
     <title>electron test 1.1.1</title>
-    <link rel="stylesheet" type="text/css" href="mainui.css">
+    <script src="ogsjsloader.js" ></script>
 </head>
 
 <body>
     <script>
-        "use strict";
-	process.oldexit = process.exit;
-	process.exit=function(e){
-		debugger;
-		process.oldexit(e);
-	}
-    </script>
-
-    <script>
 	onload = function() {
         "use strict";
-        var fs = require('fs');
-        var db = fs.readFileSync('F:\\work\\layaproj\\layatest\\model\\f1\\model_file.bin');
-        //var db = fs.readFileSync('D:\\temp\\ttt\\model_file.bin');
-        
-        window.db = db;
-        var buf = new Uint8Array(db).buffer;
-        //print 100
-        var u8buf = new Uint8Array(buf);
-        
-        function read(buf, offset) {
-          var res    = 0
-            , offset = offset || 0
-            , shift  = 0
-            , counter = offset
-            , b
-            , l = buf.length
 
-          do {
-            if(counter >= l) {
-              read.bytes = 0
-              read.bytesRead = 0 // DEPRECATED
-              return undefined
-            }
-            b = buf[counter++]
-            res += shift < 28
-              ? (b & 0x7f) << shift
-              : (b & 0x7f) * Math.pow(2, shift)
-            shift += 7
-          } while (b >= 0x80)
+        var loader = new OGSJSLoader();
+        loader.load('F:\\work\\layaproj\\layatest\\model\\f1\\model_file.bin');
+        loader.testout('d:/temp/ttt.txt');
 
-          read.bytes = counter - offset
-
-          return res
-        }        
-        
-        //把varint转换成uint32
-        function decodeVarint(u8buff,sz){
-            var ret = new Uint32Array(sz);
-            for(var s=0,a=0; a!=sz;){
-                var o=0,u=0;
-                do{
-                    o |= (0x7f & u8buff[s])<<u;
-                    u+=7;
-                }
-                while(0!==(0x80 & u8buff[s++] ))
-                ret[a++]=o;
-            }
-            return ret;
-        }
-        
-        function decodeIdex(t, e, r, n){//t 解开后的原始数据Uint32 e 解码输出数据u16array r=472 =  o.IMPLICIT_HEADER_LENGTH + n[o.IMPLICIT_HEADER_MASK_LENGTH] = 3+469
-                                  //n = 2 = 7&y.highWatermark
-            var a = t[decodeIdex.IMPLICIT_HEADER_EXPECTED_INDEX];    //0
-            var s = t[decodeIdex.IMPLICIT_HEADER_MASK_LENGTH];       // 469
-            var o = new Uint32Array(t.subarray(decodeIdex.IMPLICIT_HEADER_LENGTH, s + decodeIdex.IMPLICIT_HEADER_LENGTH));//o是去掉头和mask之后的
-            var u = 32 * s - e.length;
-            //mask次循环
-            for (var l = 1 << 31, h = 0; s > h; ++h){
-                //32次循环
-                for (var c = o[h], d = 32, p = h * d, f = h === s - 1 ? u : 0, g = f; d > g; ++g,++p){
-                    c & l >>> g ? e[p] = t[r++] : e[p] = n ? a : a++;
-                }
-            }
-            return e
-        }
-        //恢复成delta表示的
-        function undelta(t, off){
-            //第一个是1， 第二个是0， 所以从 a=i+1 开始， 例如 1,0,0,0,0
-            for (var i = off || 0, r = t.length, n = t[i], a = i + 1; r > a; ++a) {
-                var s = t[a];
-                n = t[a] = n + (s >> 1 ^ -(1 & s))
-            }
-            return t        
-        }
-        function dd(t, o, i) {
-            for (var r = i[0], n = t.length, a = 0; n > a; ++a) {
-                var s = r - t[a];
-                o[a] = s,
-                s >= r && (r = s + 1)
-            }
-            return i[0] = r,o
-        }
-        
-        decodeIdex.IMPLICIT_HEADER_PRIMITIVE_LENGTH = 0;
-        decodeIdex.IMPLICIT_HEADER_MASK_LENGTH = 1;
-        decodeIdex.IMPLICIT_HEADER_EXPECTED_INDEX = 2;
-        decodeIdex.IMPLICIT_HEADER_LENGTH = 3;
-        
-        //解码
-        var l1 = 133464;
-        //var l1 = 7773;
-        var u32dt = decodeVarint(u8buf,l1);
-        var off = decodeIdex.IMPLICIT_HEADER_LENGTH+u32dt[decodeIdex.IMPLICIT_HEADER_MASK_LENGTH];
-        u32dt = undelta( u32dt,off);
-        var oo = new Uint16Array(u32dt[decodeIdex.IMPLICIT_HEADER_PRIMITIVE_LENGTH]);
-        var d1 = decodeIdex(u32dt,oo,decodeIdex.IMPLICIT_HEADER_LENGTH+u32dt[decodeIdex.IMPLICIT_HEADER_MASK_LENGTH],2);
-        window.idx = dd(d1,d1,[0]);
-        
-        
-        var p=0;
-        for(var i=0; i<100; i++){
-            //var v = read(u8buf,p);
-            //p+=read.bytes;
-            console.log(window.idx[i]);
-        }
-        window.buf = buf;
         
     }
 
